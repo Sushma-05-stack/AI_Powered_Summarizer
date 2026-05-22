@@ -1,62 +1,75 @@
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
 const router = express.Router();
 const { optionalAuth } = require('../middleware/auth');
-
-const HISTORY_FILE = path.join(__dirname, '../data/history.json');
-
-function readHistory() {
-  try { return JSON.parse(fs.readFileSync(HISTORY_FILE, 'utf8')); } catch { return []; }
-}
-function writeHistory(data) {
-  fs.writeFileSync(HISTORY_FILE, JSON.stringify(data, null, 2));
-}
+const History = require('../models/History');
 
 // GET /api/history
-router.get('/', optionalAuth, (req, res) => {
-  try {
-    const { type, limit = 50, page = 1, search } = req.query;
-    let history = readHistory();
-    if (req.user) history = history.filter(h => h.userId === req.user.id || h.userId === 'guest');
-    if (type && type !== 'all') history = history.filter(h => h.type === type);
-    if (search) {
-      const q = search.toLowerCase();
-      history = history.filter(h =>
-        h.input?.toLowerCase().includes(q) ||
-        h.result?.title?.toLowerCase().includes(q) ||
-        h.result?.summary?.toLowerCase().includes(q)
-      );
+router.get('/', optionalAuth, async (req, res) => {
+    try {
+        const { type, limit = 50, page = 1, search } = req.query;
+
+        const query = {};
+        if (req.user) {
+            query.userId = req.user.id;
+        }
+        if (type && type !== 'all') {
+            query.type = type;
+        }
+        if (search) {
+            const q = new RegExp(search, 'i');
+            query.$or = [{ input: q }, { 'result.summary': q }, { 'result.title': q }];
+        }
+
+        const total = await History.countDocuments(query);
+        const history = await History.find(query)
+            .sort({ createdAt: -1 })
+            .skip((parseInt(page) - 1) * parseInt(limit))
+            .limit(parseInt(limit))
+            .lean();
+
+        res.json({
+            history,
+            total,
+            page: parseInt(page),
+            limit: parseInt(limit),
+            totalPages: Math.ceil(total / parseInt(limit))
+        });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
     }
-    const total = history.length;
-    const start = (parseInt(page) - 1) * parseInt(limit);
-    const paginated = history.slice(start, start + parseInt(limit));
-    res.json({ history: paginated, total, page: parseInt(page), limit: parseInt(limit), totalPages: Math.ceil(total / limit) });
-  } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 // GET /api/history/:id
-router.get('/:id', optionalAuth, (req, res) => {
-  const history = readHistory();
-  const item = history.find(h => h.id === req.params.id);
-  if (!item) return res.status(404).json({ error: 'History item not found.' });
-  res.json({ item });
+router.get('/:id', optionalAuth, async (req, res) => {
+    try {
+        const item = await History.findOne({ id: req.params.id }).lean();
+        if (!item) return res.status(404).json({ error: 'History item not found.' });
+        res.json({ item });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 // DELETE /api/history/:id
-router.delete('/:id', optionalAuth, (req, res) => {
-  let history = readHistory();
-  const idx = history.findIndex(h => h.id === req.params.id);
-  if (idx === -1) return res.status(404).json({ error: 'History item not found.' });
-  history.splice(idx, 1);
-  writeHistory(history);
-  res.json({ message: 'History item deleted.' });
+router.delete('/:id', optionalAuth, async (req, res) => {
+    try {
+        const result = await History.findOneAndDelete({ id: req.params.id });
+        if (!result) return res.status(404).json({ error: 'History item not found.' });
+        res.json({ message: 'History item deleted.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
-// DELETE /api/history (clear all)
-router.delete('/', optionalAuth, (req, res) => {
-  writeHistory([]);
-  res.json({ message: 'History cleared.' });
+// DELETE /api/history (clear all for user)
+router.delete('/', optionalAuth, async (req, res) => {
+    try {
+        const query = req.user ? { userId: req.user.id } : { userId: 'guest' };
+        await History.deleteMany(query);
+        res.json({ message: 'History cleared.' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
 });
 
 module.exports = router;

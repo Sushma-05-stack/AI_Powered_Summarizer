@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
+const mongoose = require('mongoose');
 
 const authRoutes = require('./routes/auth');
 const summarizeRoutes = require('./routes/summarize');
@@ -68,12 +69,18 @@ app.use((err, req, res, next) => {
   });
 });
 
+// ─── MongoDB Connection ───────────────────────────────────────────────────────
+mongoose.connect(process.env.MONGODB_URI)
+  .then(() => console.log('✅ MongoDB connected'))
+  .catch(err => console.error('❌ MongoDB connection failed:', err.message));
+
 // ─── Start Server ─────────────────────────────────────────────────────────────
 app.listen(PORT, () => {
   console.log(`\n🚀 AI Summarizer Server running on http://localhost:${PORT}`);
   console.log(`📊 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🤖 Gemini API: ${process.env.GEMINI_API_KEY ? '✅ Configured' : '❌ Missing — set GEMINI_API_KEY in .env'}`);
   console.log(`🔐 JWT Secret: ${process.env.JWT_SECRET ? '✅ Configured' : '❌ Missing — set JWT_SECRET in .env'}`);
+  console.log(`🗄️  MongoDB:    ${process.env.MONGODB_URI ? '✅ Configured' : '❌ Missing — set MONGODB_URI in .env'}`);
   console.log(`\n📌 API Endpoints:`);
   console.log(`   POST /api/auth/register`);
   console.log(`   POST /api/auth/login`);
