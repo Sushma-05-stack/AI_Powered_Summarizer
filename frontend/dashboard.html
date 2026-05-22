@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — SummAI</title>
+  <meta name="description" content="Your SummAI dashboard — overview of summaries, usage, and quick actions."/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    .quick-actions { display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:16px; margin-bottom:32px; }
+    .quick-action { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:24px 20px; text-align:center; text-decoration:none; color:var(--text-primary); transition:var(--transition); cursor:pointer; display:flex; flex-direction:column; align-items:center; gap:12px; }
+    .quick-action:hover { border-color:var(--primary); transform:translateY(-4px); box-shadow:var(--shadow-md); background:var(--bg-card-hover); }
+    .quick-action-icon { font-size:2rem; width:56px; height:56px; border-radius:var(--radius-md); display:flex; align-items:center; justify-content:center; }
+    .quick-action-label { font-size:0.85rem; font-weight:600; }
+    .recent-table-row { display:grid; grid-template-columns:auto 1fr auto auto auto; gap:12px; align-items:center; padding:14px 16px; border-radius:var(--radius-md); transition:var(--transition-fast); }
+    .recent-table-row:hover { background:var(--bg-card-hover); }
+    .welcome-banner { background:var(--gradient-card); border:1px solid rgba(108,99,255,0.2); border-radius:var(--radius-xl); padding:32px; margin-bottom:32px; display:flex; align-items:center; justify-content:space-between; gap:24px; flex-wrap:wrap; position:relative; overflow:hidden; }
+    .welcome-banner::after { content:'🧠'; position:absolute; right:40px; top:50%; transform:translateY(-50%); font-size:6rem; opacity:0.06; }
+    .activity-bar { display:flex; align-items:flex-end; gap:4px; height:60px; }
+    .activity-day { display:flex; flex-direction:column; align-items:center; gap:4px; flex:1; }
+    .activity-bar-fill { width:100%; border-radius:2px; background:var(--gradient-primary); min-height:4px; transition:height 0.5s; }
+    .activity-day-label { font-size:0.6rem; color:var(--text-muted); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <div class="sidebar-logo-icon">🧠</div>
+      <div class="sidebar-logo-text">Summ<span>AI</span></div>
+    </a>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Main</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html" class="active" data-page="dashboard"><span class="nav-icon">📊</span>Dashboard</a></li>
+        <li><a href="text-summarizer.html" data-page="text"><span class="nav-icon">📝</span>Text Summarizer</a></li>
+        <li><a href="file-upload.html" data-page="file"><span class="nav-icon">📁</span>File Upload</a></li>
+        <li><a href="pdf-summarizer.html" data-page="pdf"><span class="nav-icon">📄</span>PDF Summarizer</a></li>
+        <li><a href="url-summarizer.html" data-page="url"><span class="nav-icon">🔗</span>URL Summarizer</a></li>
+        <li><a href="youtube-summarizer.html" data-page="yt"><span class="nav-icon">▶️</span>YouTube Summarizer</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Insights</div>
+      <ul class="sidebar-nav">
+        <li><a href="history.html" data-page="history"><span class="nav-icon">🕒</span>History</a></li>
+        <li><a href="analytics.html" data-page="analytics"><span class="nav-icon">📈</span>Analytics</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-label">Account</div>
+      <ul class="sidebar-nav">
+        <li><a href="settings.html" data-page="settings"><span class="nav-icon">⚙️</span>Settings</a></li>
+        <li><a href="api-config.html" data-page="api"><span class="nav-icon">🔑</span>API Configuration</a></li>
+        <li><a href="profile.html" data-page="profile"><span class="nav-icon">👤</span>Profile</a></li>
+        <li><button onclick="handleLogout()"><span class="nav-icon">🚪</span>Logout</button></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer">
+      <a href="profile.html" class="sidebar-user">
+        <img id="sidebar-avatar" src="https://ui-avatars.com/api/?name=User&background=6c63ff&color=fff" alt="User"/>
+        <div class="sidebar-user-info">
+          <div class="user-name" id="sidebar-name">User</div>
+          <div class="user-plan" id="sidebar-plan">free</div>
+        </div>
+      </a>
+    </div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <main class="main-content">
+    <header class="top-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+        <h1 class="page-title">Dashboard</h1>
+      </div>
+      <div class="header-actions">
+        <a href="text-summarizer.html" class="btn btn-primary btn-sm">+ New Summary</a>
+      </div>
+    </header>
+    <div class="page-content">
+      <!-- Welcome Banner -->
+      <div class="welcome-banner">
+        <div>
+          <h2 id="welcome-msg" style="font-size:1.5rem;margin-bottom:6px">Welcome back! 👋</h2>
+          <p style="color:var(--text-muted);font-size:0.9rem">Here's what's happening with your summaries today.</p>
+        </div>
+        <a href="text-summarizer.html" class="btn btn-primary">🚀 Start Summarizing</a>
+      </div>
+      <!-- Stats -->
+      <div class="stats-grid" id="stats-grid">
+        <div class="stat-card"><div class="stat-icon purple">📝</div><div><div class="stat-value" id="stat-total">—</div><div class="stat-label">Total Summaries</div></div></div>
+        <div class="stat-card"><div class="stat-icon cyan">📄</div><div><div class="stat-value" id="stat-today">—</div><div class="stat-label">Today</div></div></div>
+        <div class="stat-card"><div class="stat-icon pink">📊</div><div><div class="stat-value" id="stat-words">—</div><div class="stat-label">Words Processed</div></div></div>
+        <div class="stat-card"><div class="stat-icon green">⭐</div><div><div class="stat-value" id="stat-streak">—</div><div class="stat-label">Day Streak</div></div></div>
+      </div>
+      <!-- Quick Actions -->
+      <h3 style="margin-bottom:16px;font-size:1rem;color:var(--text-secondary)">QUICK ACTIONS</h3>
+      <div class="quick-actions">
+        <a href="text-summarizer.html" class="quick-action"><div class="quick-action-icon" style="background:rgba(108,99,255,0.2)">📝</div><div class="quick-action-label">Text</div></a>
+        <a href="pdf-summarizer.html" class="quick-action"><div class="quick-action-icon" style="background:rgba(239,68,68,0.2)">📄</div><div class="quick-action-label">PDF</div></a>
+        <a href="url-summarizer.html" class="quick-action"><div class="quick-action-icon" style="background:rgba(0,212,255,0.2)">🔗</div><div class="quick-action-label">URL / Article</div></a>
+        <a href="youtube-summarizer.html" class="quick-action"><div class="quick-action-icon" style="background:rgba(255,0,0,0.15)">▶️</div><div class="quick-action-label">YouTube</div></a>
+        <a href="file-upload.html" class="quick-action"><div class="quick-action-icon" style="background:rgba(0,229,160,0.2)">📁</div><div class="quick-action-label">File Upload</div></a>
+        <a href="history.html" class="quick-action"><div class="quick-action-icon" style="background:rgba(245,158,11,0.2)">🕒</div><div class="quick-action-label">History</div></a>
+      </div>
+      <!-- Charts Row -->
+      <div class="grid-2" style="margin-bottom:24px">
+        <div class="chart-container">
+          <div class="chart-title">📅 Last 7 Days Activity</div>
+          <div class="activity-bar" id="activity-bars"></div>
+        </div>
+        <div class="chart-container">
+          <div class="chart-title">📊 Content Types</div>
+          <div id="type-chart" style="display:flex;flex-direction:column;gap:10px;margin-top:8px"></div>
+        </div>
+      </div>
+      <!-- Recent Summaries -->
+      <div class="card">
+        <div class="flex-between" style="margin-bottom:20px">
+          <h3 style="font-size:1rem">🕒 Recent Summaries</h3>
+          <a href="history.html" class="btn btn-secondary btn-sm">View All</a>
+        </div>
+        <div id="recent-list">
+          <div class="skeleton skeleton-title"></div>
+          <div class="skeleton skeleton-text"></div>
+          <div class="skeleton skeleton-text" style="width:70%"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/app.js"></script>
+<script>
+  initSidebar('dashboard');
+  // Welcome
+  const user = Auth.getUser();
+  if (user) document.getElementById('welcome-msg').textContent = `Welcome back, ${user.name}! 👋`;
+
+  async function loadDashboard() {
+    try {
+      const data = await Api.getAnalytics();
+      document.getElementById('stat-total').textContent = data.total || 0;
+      const today = data.dailyUsage?.slice(-1)[0]?.count || 0;
+      document.getElementById('stat-today').textContent = today;
+      document.getElementById('stat-words').textContent = Format.number(data.totalWords || 0);
+      // Streak calculation
+      let streak = 0;
+      const daily = [...(data.dailyUsage || [])].reverse();
+      for (const d of daily) { if (d.count > 0) streak++; else break; }
+      document.getElementById('stat-streak').textContent = streak + ' day' + (streak !== 1 ? 's' : '');
+      // Activity bars
+      const bars = document.getElementById('activity-bars');
+      const last7 = (data.dailyUsage || []).slice(-7);
+      const maxVal = Math.max(...last7.map(d => d.count), 1);
+      bars.innerHTML = last7.map(d => {
+        const pct = Math.max((d.count / maxVal) * 100, 4);
+        const label = new Date(d.date).toLocaleDateString('en',{weekday:'short'}).slice(0,1);
+        return `<div class="activity-day"><div class="activity-bar-fill" style="height:${pct}%;background:${d.count>0?'var(--gradient-primary)':'rgba(255,255,255,0.06)'}"></div><div class="activity-day-label">${label}</div></div>`;
+      }).join('');
+      // Type chart
+      const typeChart = document.getElementById('type-chart');
+      const byType = data.byType || {};
+      const types = [{k:'text',l:'Text',c:'var(--primary)'},{k:'pdf',l:'PDF',c:'var(--danger)'},{k:'url',l:'URL',c:'var(--accent)'},{k:'youtube',l:'YouTube',c:'#ff0000'},{k:'file',l:'File',c:'var(--accent3)'}];
+      const total = Object.values(byType).reduce((a,b)=>a+b,0) || 1;
+      typeChart.innerHTML = types.filter(t=>byType[t.k]).map(t => `
+        <div><div style="display:flex;justify-content:space-between;font-size:0.8rem;margin-bottom:4px"><span>${Format.typeIcon(t.k)} ${t.l}</span><span style="color:var(--text-muted)">${byType[t.k]||0}</span></div>
+        <div class="progress-bar"><div class="progress-fill" style="width:${((byType[t.k]||0)/total*100).toFixed(1)}%;background:${t.c}"></div></div></div>`).join('') || '<div style="color:var(--text-muted);font-size:0.85rem">No data yet</div>';
+      // Recent list
+      const histData = await Api.getHistory({ limit: 5 });
+      const recentList = document.getElementById('recent-list');
+      if (!histData.history?.length) {
+        recentList.innerHTML = `<div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">📭</div><h3>No summaries yet</h3><p>Start summarizing to see your history here.</p><a href="text-summarizer.html" class="btn btn-primary btn-sm" style="margin-top:8px">Create First Summary</a></div>`;
+      } else {
+        recentList.innerHTML = histData.history.map(h => `
+          <div class="recent-table-row">
+            <span style="font-size:1.2rem">${Format.typeIcon(h.type)}</span>
+            <div><div style="font-size:0.88rem;font-weight:600;margin-bottom:2px">${h.result?.title || h.input?.substring(0,60) || 'Summary'}</div>
+            <div style="font-size:0.75rem;color:var(--text-muted)">${Format.typeLabel(h.type)} · ${Format.timeAgo(h.createdAt)}</div></div>
+            <span class="sentiment ${h.result?.sentiment||'neutral'}" style="font-size:0.72rem">${Format.sentimentEmoji(h.result?.sentiment)} ${h.result?.sentiment||'neutral'}</span>
+            <span class="badge badge-primary" style="font-size:0.72rem">${h.result?.readingTime||''}</span>
+            <a href="results.html" onclick="sessionStorage.setItem('summai_result',JSON.stringify(h.result))" class="btn btn-secondary btn-sm">View</a>
+          </div>`).join('');
+      }
+    } catch(err) {
+      console.error(err);
+      if (err.message.includes('token') || err.message.includes('401')) { /* guest mode */ }
+      document.getElementById('recent-list').innerHTML = `<div class="empty-state" style="padding:40px 0"><div class="empty-state-icon">⚠️</div><h3>Could not load data</h3><p>Make sure the backend server is running on port 5000.</p></div>`;
+    }
+  }
+  loadDashboard();
+  function handleLogout() { Auth.clearAuth(); window.location.href='login.html'; }
+</script>
+</body>
+</html>

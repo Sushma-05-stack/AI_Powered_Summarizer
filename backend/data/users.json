@@ -1,0 +1,19 @@
+[
+  {
+    "id": "5c9c3381-e579-4b40-a521-f639408183b3",
+    "name": "ENNAKAPALLY SUSHMA",
+    "email": "23eg107b20@anurag.edu.in",
+    "password": "$2a$12$yN4MhgGnqw8eeGxr7Na6Ge/O9lpBc0c/HiCqDjNqC3xvNHyaK9YYe",
+    "avatar": "https://ui-avatars.com/api/?name=ENNAKAPALLY%20SUSHMA&background=6c63ff&color=fff&size=128",
+    "plan": "free",
+    "summaryCount": 0,
+    "createdAt": "2026-05-21T12:58:03.896Z",
+    "settings": {
+      "defaultLength": "medium",
+      "defaultFormat": "paragraph",
+      "defaultTone": "formal",
+      "language": "English",
+      "theme": "dark"
+    }
+  }
+]

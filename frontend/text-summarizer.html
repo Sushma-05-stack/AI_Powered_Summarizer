@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Text Summarizer — SummAI</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    .char-limit { color:var(--danger); }
+    .example-pills { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:16px; }
+    .example-pill { padding:6px 14px; background:rgba(108,99,255,0.1); border:1px solid rgba(108,99,255,0.2); border-radius:20px; font-size:0.78rem; color:var(--primary); cursor:pointer; transition:var(--transition-fast); }
+    .example-pill:hover { background:rgba(108,99,255,0.2); }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo"><div class="sidebar-logo-icon">🧠</div><div class="sidebar-logo-text">Summ<span>AI</span></div></a>
+    <div class="sidebar-section"><div class="sidebar-section-label">Main</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+        <li><a href="text-summarizer.html" class="active"><span class="nav-icon">📝</span>Text Summarizer</a></li>
+        <li><a href="file-upload.html"><span class="nav-icon">📁</span>File Upload</a></li>
+        <li><a href="pdf-summarizer.html"><span class="nav-icon">📄</span>PDF Summarizer</a></li>
+        <li><a href="url-summarizer.html"><span class="nav-icon">🔗</span>URL Summarizer</a></li>
+        <li><a href="youtube-summarizer.html"><span class="nav-icon">▶️</span>YouTube Summarizer</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Insights</div>
+      <ul class="sidebar-nav">
+        <li><a href="history.html"><span class="nav-icon">🕒</span>History</a></li>
+        <li><a href="analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Account</div>
+      <ul class="sidebar-nav">
+        <li><a href="settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
+        <li><a href="api-config.html"><span class="nav-icon">🔑</span>API Configuration</a></li>
+        <li><a href="profile.html"><span class="nav-icon">👤</span>Profile</a></li>
+        <li><button onclick="Auth.clearAuth();window.location.href='login.html'"><span class="nav-icon">🚪</span>Logout</button></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer"><a href="profile.html" class="sidebar-user"><img id="sidebar-avatar" src="https://ui-avatars.com/api/?name=User&background=6c63ff&color=fff" alt="User"/><div class="sidebar-user-info"><div class="user-name" id="sidebar-name">User</div><div class="user-plan">free</div></div></a></div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <main class="main-content">
+    <header class="top-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+        <h1 class="page-title">📝 Text Summarizer</h1>
+      </div>
+      <div class="header-actions">
+        <a href="api-config.html" class="btn btn-secondary btn-sm">🔑 API Key</a>
+      </div>
+    </header>
+    <div class="page-content">
+      <div class="grid-2" style="gap:24px;align-items:start">
+        <!-- Input Panel -->
+        <div>
+          <div class="card" style="margin-bottom:0">
+            <h3 style="margin-bottom:16px;font-size:1rem;color:var(--text-secondary)">PASTE YOUR TEXT</h3>
+            <div class="example-pills">
+              <span class="example-pill" onclick="loadExample('news')">📰 News Article</span>
+              <span class="example-pill" onclick="loadExample('research')">🔬 Research</span>
+              <span class="example-pill" onclick="loadExample('story')">📖 Short Story</span>
+            </div>
+            <div class="form-group">
+              <textarea id="input-text" class="form-textarea" placeholder="Paste or type your text here... (minimum 10 characters, maximum 30,000 characters)" style="min-height:280px"></textarea>
+              <div class="counter-bar">
+                <span id="word-count" class="count">0 words</span>
+                <span id="char-count" class="count">0 / 30,000 chars</span>
+              </div>
+            </div>
+            <div id="options-panel"></div>
+            <button id="summarize-btn" class="btn btn-primary btn-block btn-lg" onclick="summarize()">
+              ✨ Summarize with AI
+            </button>
+          </div>
+        </div>
+        <!-- Result Panel -->
+        <div>
+          <div id="result-container">
+            <div class="card" style="text-align:center;padding:60px 24px">
+              <div style="font-size:3rem;margin-bottom:16px;opacity:0.3">✨</div>
+              <h3 style="color:var(--text-muted)">Your summary will appear here</h3>
+              <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px">Paste text and click "Summarize with AI"</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/app.js"></script>
+<script>
+  initSidebar();
+  document.getElementById('options-panel').innerHTML = optionsPanelHTML();
+  initCounter('input-text', 'word-count', null);
+  // char counter
+  document.getElementById('input-text').addEventListener('input', function() {
+    const cnt = document.getElementById('char-count');
+    cnt.textContent = `${this.value.length} / 30,000 chars`;
+    cnt.className = 'count' + (this.value.length > 30000 ? ' char-limit' : '');
+  });
+
+  const examples = {
+    news: `Artificial intelligence is transforming the global economy at an unprecedented pace. According to a recent report by McKinsey Global Institute, AI could contribute up to $13 trillion to the global economy by 2030. Industries ranging from healthcare to finance and manufacturing are rapidly adopting AI-powered solutions to improve efficiency, reduce costs, and drive innovation. However, this technological revolution also raises significant concerns about job displacement and the need for workforce reskilling.`,
+    research: `A groundbreaking study published in Nature Medicine reveals that a new mRNA-based vaccine demonstrates 94% efficacy against multiple variants of a common respiratory virus. The clinical trial, conducted across 15 countries with over 40,000 participants, showed that the vaccine generates robust immune responses in all age groups. Side effects were minimal and comparable to existing approved vaccines. Researchers believe this platform technology could revolutionize how we develop vaccines for future pandemics, potentially reducing development time from years to months.`,
+    story: `The old lighthouse keeper had tended the light for forty years, watching ships pass in the night and storms roll in from the horizon. On this particular evening, as a fierce nor'easter approached, he noticed a small vessel struggling against the waves. Without hesitation, he increased the intensity of the beacon and sent out a radio call. Hours later, the grateful crew of the fishing boat arrived at the dock, their lives saved by the keeper's vigilance. It was, he reflected quietly, just another ordinary night on the job.`
+  };
+  function loadExample(type) {
+    document.getElementById('input-text').value = examples[type];
+    document.getElementById('input-text').dispatchEvent(new Event('input'));
+    Toast.info('Example text loaded!');
+  }
+  async function summarize() {
+    const text = document.getElementById('input-text').value.trim();
+    if (!text || text.length < 10) { Toast.error('Please enter at least 10 characters of text.'); return; }
+    if (text.length > 30000) { Toast.error('Text exceeds 30,000 character limit.'); return; }
+    if (!Auth.getApiKey()) { Toast.warning('No API key set. Go to API Configuration to add your Gemini key.', 6000); }
+    const btn = document.getElementById('summarize-btn');
+    btn.disabled = true; btn.innerHTML = '<span class="spinner spinner-sm"></span> Processing...';
+    Loader.show('Gemini AI is analyzing your text...');
+    try {
+      const data = await Api.summarizeText(text, buildOptions());
+      renderResult(data.result);
+      Results.save(data.result);
+      Toast.success('Summary generated!');
+    } catch(err) {
+      Toast.error(err.message, 6000);
+      document.getElementById('result-container').innerHTML = `<div class="card" style="border-color:var(--danger)"><h3 style="color:var(--danger)">❌ Error</h3><p style="margin-top:8px">${err.message}</p><p style="margin-top:12px;font-size:0.82rem;color:var(--text-muted)">Make sure your Gemini API key is configured in <a href="api-config.html" style="color:var(--accent)">API Settings</a>.</p></div>`;
+    } finally {
+      Loader.hide(); btn.disabled=false; btn.innerHTML='✨ Summarize with AI';
+    }
+  }
+</script>
+</body>
+</html>

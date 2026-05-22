@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>PDF Summarizer — SummAI</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo"><div class="sidebar-logo-icon">🧠</div><div class="sidebar-logo-text">Summ<span>AI</span></div></a>
+    <div class="sidebar-section"><div class="sidebar-section-label">Main</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+        <li><a href="text-summarizer.html"><span class="nav-icon">📝</span>Text Summarizer</a></li>
+        <li><a href="file-upload.html"><span class="nav-icon">📁</span>File Upload</a></li>
+        <li><a href="pdf-summarizer.html" class="active"><span class="nav-icon">📄</span>PDF Summarizer</a></li>
+        <li><a href="url-summarizer.html"><span class="nav-icon">🔗</span>URL Summarizer</a></li>
+        <li><a href="youtube-summarizer.html"><span class="nav-icon">▶️</span>YouTube Summarizer</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Insights</div>
+      <ul class="sidebar-nav">
+        <li><a href="history.html"><span class="nav-icon">🕒</span>History</a></li>
+        <li><a href="analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Account</div>
+      <ul class="sidebar-nav">
+        <li><a href="settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
+        <li><a href="api-config.html"><span class="nav-icon">🔑</span>API Configuration</a></li>
+        <li><a href="profile.html"><span class="nav-icon">👤</span>Profile</a></li>
+        <li><button onclick="Auth.clearAuth();window.location.href='login.html'"><span class="nav-icon">🚪</span>Logout</button></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer"><a href="profile.html" class="sidebar-user"><img id="sidebar-avatar" src="https://ui-avatars.com/api/?name=User&background=6c63ff&color=fff" alt="User"/><div class="sidebar-user-info"><div class="user-name" id="sidebar-name">User</div><div class="user-plan">free</div></div></a></div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <main class="main-content">
+    <header class="top-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+        <h1 class="page-title">📄 PDF Summarizer</h1>
+      </div>
+    </header>
+    <div class="page-content">
+      <div class="grid-2" style="gap:24px;align-items:start">
+        <div>
+          <div class="card">
+            <h3 style="margin-bottom:8px;font-size:1rem;color:var(--text-secondary)">UPLOAD PDF FILE</h3>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:20px">Supports PDF files up to 10MB. Text-based PDFs only (not scanned images).</p>
+            <div class="upload-zone" id="drop-zone">
+              <input type="file" id="pdf-input" accept=".pdf" onchange="handleFileSelect(this.files[0])"/>
+              <div class="upload-icon">📄</div>
+              <div class="upload-title">Drop your PDF here</div>
+              <div class="upload-subtitle">or click to browse files</div>
+              <div class="upload-hint">Maximum file size: 10MB · PDF files only</div>
+            </div>
+            <div id="file-info" class="hidden" style="margin-top:16px;padding:16px;background:rgba(108,99,255,0.08);border-radius:var(--radius-md);border:1px solid rgba(108,99,255,0.2)">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span style="font-size:1.5rem">📄</span>
+                <div style="flex:1"><div id="file-name" style="font-weight:600;font-size:0.9rem"></div><div id="file-size" style="font-size:0.78rem;color:var(--text-muted);margin-top:2px"></div></div>
+                <button onclick="clearFile()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1rem">✕</button>
+              </div>
+            </div>
+            <div style="margin-top:20px" id="options-panel"></div>
+            <button id="summarize-btn" class="btn btn-primary btn-block btn-lg" onclick="summarizePDF()" style="margin-top:16px">📄 Summarize PDF</button>
+          </div>
+          <div class="card" style="margin-top:16px">
+            <h4 style="margin-bottom:12px;font-size:0.85rem;color:var(--text-secondary)">💡 Tips for Best Results</h4>
+            <ul style="list-style:none;display:flex;flex-direction:column;gap:8px">
+              <li style="font-size:0.82rem;color:var(--text-muted);display:flex;gap:8px"><span>✅</span><span>Use text-based PDFs (not scanned images)</span></li>
+              <li style="font-size:0.82rem;color:var(--text-muted);display:flex;gap:8px"><span>✅</span><span>Research papers, reports, and articles work best</span></li>
+              <li style="font-size:0.82rem;color:var(--text-muted);display:flex;gap:8px"><span>✅</span><span>Files with embedded fonts are supported</span></li>
+              <li style="font-size:0.82rem;color:var(--text-muted);display:flex;gap:8px"><span>❌</span><span>Scanned PDFs (images) are not supported yet</span></li>
+            </ul>
+          </div>
+        </div>
+        <div id="result-container">
+          <div class="card" style="text-align:center;padding:60px 24px">
+            <div style="font-size:3rem;margin-bottom:16px;opacity:0.3">📄</div>
+            <h3 style="color:var(--text-muted)">Upload a PDF to summarize</h3>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px">Drag and drop or click to select a PDF file</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/app.js"></script>
+<script>
+  initSidebar();
+  document.getElementById('options-panel').innerHTML = optionsPanelHTML();
+  let selectedFile = null;
+  const dropZone = document.getElementById('drop-zone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); if(e.dataTransfer.files[0]) handleFileSelect(e.dataTransfer.files[0]); });
+  function handleFileSelect(file) {
+    if (!file) return;
+    if (!file.name.endsWith('.pdf')) { Toast.error('Please select a PDF file.'); return; }
+    if (file.size > 10*1024*1024) { Toast.error('File too large. Maximum size is 10MB.'); return; }
+    selectedFile = file;
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('file-size').textContent = (file.size/1024/1024).toFixed(2) + ' MB';
+    DOM.show(document.getElementById('file-info'));
+    dropZone.style.borderColor = 'var(--success)';
+    Toast.success('PDF selected: ' + file.name);
+  }
+  function clearFile() { selectedFile=null; document.getElementById('pdf-input').value=''; DOM.hide(document.getElementById('file-info')); dropZone.style.borderColor=''; }
+  async function summarizePDF() {
+    if (!selectedFile) { Toast.error('Please select a PDF file.'); return; }
+    const btn = document.getElementById('summarize-btn');
+    btn.disabled=true; btn.innerHTML='<span class="spinner spinner-sm"></span> Processing PDF...';
+    Loader.show('Extracting text from PDF...');
+    try {
+      const fd = new FormData();
+      fd.append('file', selectedFile);
+      fd.append('options', JSON.stringify(buildOptions()));
+      if (Auth.getApiKey()) fd.append('apiKey', Auth.getApiKey());
+      Loader.setMessage('Gemini AI is summarizing...');
+      const data = await Api.summarizePDF(fd);
+      renderResult(data.result);
+      Results.save(data.result);
+      Toast.success('PDF summarized successfully!');
+    } catch(err) {
+      Toast.error(err.message, 6000);
+      document.getElementById('result-container').innerHTML = `<div class="card" style="border-color:var(--danger)"><h3 style="color:var(--danger)">❌ Error</h3><p style="margin-top:8px">${err.message}</p></div>`;
+    } finally { Loader.hide(); btn.disabled=false; btn.innerHTML='📄 Summarize PDF'; }
+  }
+</script>
+</body>
+</html>

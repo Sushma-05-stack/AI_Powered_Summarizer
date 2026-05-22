@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>URL Summarizer — SummAI</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo"><div class="sidebar-logo-icon">🧠</div><div class="sidebar-logo-text">Summ<span>AI</span></div></a>
+    <div class="sidebar-section"><div class="sidebar-section-label">Main</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+        <li><a href="text-summarizer.html"><span class="nav-icon">📝</span>Text Summarizer</a></li>
+        <li><a href="file-upload.html"><span class="nav-icon">📁</span>File Upload</a></li>
+        <li><a href="pdf-summarizer.html"><span class="nav-icon">📄</span>PDF Summarizer</a></li>
+        <li><a href="url-summarizer.html" class="active"><span class="nav-icon">🔗</span>URL Summarizer</a></li>
+        <li><a href="youtube-summarizer.html"><span class="nav-icon">▶️</span>YouTube Summarizer</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Insights</div>
+      <ul class="sidebar-nav">
+        <li><a href="history.html"><span class="nav-icon">🕒</span>History</a></li>
+        <li><a href="analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Account</div>
+      <ul class="sidebar-nav">
+        <li><a href="settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
+        <li><a href="api-config.html"><span class="nav-icon">🔑</span>API Configuration</a></li>
+        <li><a href="profile.html"><span class="nav-icon">👤</span>Profile</a></li>
+        <li><button onclick="Auth.clearAuth();window.location.href='login.html'"><span class="nav-icon">🚪</span>Logout</button></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer"><a href="profile.html" class="sidebar-user"><img src="https://ui-avatars.com/api/?name=User&background=6c63ff&color=fff" alt="User"/><div class="sidebar-user-info"><div class="user-name" id="sidebar-name">User</div><div class="user-plan">free</div></div></a></div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <main class="main-content">
+    <header class="top-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+        <h1 class="page-title">🔗 URL / Article Summarizer</h1>
+      </div>
+    </header>
+    <div class="page-content">
+      <div class="grid-2" style="gap:24px;align-items:start">
+        <div>
+          <div class="card">
+            <h3 style="margin-bottom:8px;font-size:1rem;color:var(--text-secondary)">ENTER ARTICLE URL</h3>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:20px">Paste any public article, blog post, or webpage URL to generate an instant AI summary.</p>
+            <div class="form-group">
+              <label class="form-label">Article URL</label>
+              <div class="input-group">
+                <span class="input-icon">🔗</span>
+                <input type="url" id="url-input" class="form-control" placeholder="https://example.com/article..." style="padding-left:48px"/>
+              </div>
+            </div>
+            <!-- Quick URL examples -->
+            <div style="margin-bottom:20px">
+              <div style="font-size:0.78rem;color:var(--text-muted);margin-bottom:8px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px">Try an example:</div>
+              <div style="display:flex;flex-wrap:wrap;gap:8px">
+                <button class="example-pill" style="padding:6px 14px;background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.2);border-radius:20px;font-size:0.78rem;color:var(--primary);cursor:pointer;transition:all 0.15s" onclick="document.getElementById('url-input').value='https://en.wikipedia.org/wiki/Artificial_intelligence'">🤖 Wikipedia: AI</button>
+                <button class="example-pill" style="padding:6px 14px;background:rgba(108,99,255,0.1);border:1px solid rgba(108,99,255,0.2);border-radius:20px;font-size:0.78rem;color:var(--primary);cursor:pointer;transition:all 0.15s" onclick="document.getElementById('url-input').value='https://en.wikipedia.org/wiki/Machine_learning'">🧠 Wikipedia: ML</button>
+              </div>
+            </div>
+            <div id="options-panel"></div>
+            <button id="summarize-btn" class="btn btn-primary btn-block btn-lg" onclick="summarizeURL()">🔗 Summarize Article</button>
+          </div>
+          <div class="card" style="margin-top:16px">
+            <h4 style="margin-bottom:12px;font-size:0.85rem;color:var(--text-secondary)">ℹ️ Supported Sites</h4>
+            <div style="display:flex;flex-wrap:wrap;gap:8px">
+              <span class="badge badge-primary">Wikipedia</span><span class="badge badge-primary">News Sites</span><span class="badge badge-primary">Blogs</span>
+              <span class="badge badge-primary">Research Papers</span><span class="badge badge-primary">Tech Articles</span><span class="badge badge-primary">Documentation</span>
+            </div>
+            <p style="font-size:0.78rem;color:var(--text-muted);margin-top:12px">⚠️ Paywalled sites, social media, and JavaScript-heavy pages may not work.</p>
+          </div>
+        </div>
+        <div id="result-container">
+          <div class="card" style="text-align:center;padding:60px 24px">
+            <div style="font-size:3rem;margin-bottom:16px;opacity:0.3">🔗</div>
+            <h3 style="color:var(--text-muted)">Enter a URL to summarize</h3>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px">Paste any article or webpage link above</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/app.js"></script>
+<script>
+  initSidebar();
+  document.getElementById('options-panel').innerHTML = optionsPanelHTML();
+  document.getElementById('url-input').addEventListener('keydown', e => { if(e.key==='Enter') summarizeURL(); });
+  async function summarizeURL() {
+    const url = document.getElementById('url-input').value.trim();
+    if (!url) { Toast.error('Please enter a URL.'); return; }
+    if (!url.startsWith('http')) { Toast.error('Please enter a valid URL starting with http:// or https://'); return; }
+    const btn = document.getElementById('summarize-btn');
+    btn.disabled=true; btn.innerHTML='<span class="spinner spinner-sm"></span> Fetching article...';
+    Loader.show('Fetching article content...');
+    try {
+      Loader.setMessage('Gemini AI is summarizing the article...');
+      const data = await Api.summarizeURL(url, buildOptions());
+      renderResult(data.result);
+      Results.save(data.result);
+      Toast.success('Article summarized!');
+    } catch(err) {
+      Toast.error(err.message, 7000);
+      document.getElementById('result-container').innerHTML = `<div class="card" style="border-color:var(--danger)"><h3 style="color:var(--danger)">❌ Error</h3><p style="margin-top:8px">${err.message}</p></div>`;
+    } finally { Loader.hide(); btn.disabled=false; btn.innerHTML='🔗 Summarize Article'; }
+  }
+</script>
+</body>
+</html>

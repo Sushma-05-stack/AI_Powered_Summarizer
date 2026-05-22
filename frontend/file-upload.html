@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>File Upload — SummAI</title>
+  <link rel="stylesheet" href="css/main.css"/>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo"><div class="sidebar-logo-icon">🧠</div><div class="sidebar-logo-text">Summ<span>AI</span></div></a>
+    <div class="sidebar-section"><div class="sidebar-section-label">Main</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+        <li><a href="text-summarizer.html"><span class="nav-icon">📝</span>Text Summarizer</a></li>
+        <li><a href="file-upload.html" class="active"><span class="nav-icon">📁</span>File Upload</a></li>
+        <li><a href="pdf-summarizer.html"><span class="nav-icon">📄</span>PDF Summarizer</a></li>
+        <li><a href="url-summarizer.html"><span class="nav-icon">🔗</span>URL Summarizer</a></li>
+        <li><a href="youtube-summarizer.html"><span class="nav-icon">▶️</span>YouTube Summarizer</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Insights</div>
+      <ul class="sidebar-nav">
+        <li><a href="history.html"><span class="nav-icon">🕒</span>History</a></li>
+        <li><a href="analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Account</div>
+      <ul class="sidebar-nav">
+        <li><a href="settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
+        <li><a href="api-config.html"><span class="nav-icon">🔑</span>API Configuration</a></li>
+        <li><a href="profile.html"><span class="nav-icon">👤</span>Profile</a></li>
+        <li><button onclick="Auth.clearAuth();window.location.href='login.html'"><span class="nav-icon">🚪</span>Logout</button></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer"><a href="profile.html" class="sidebar-user"><img src="https://ui-avatars.com/api/?name=User&background=6c63ff&color=fff" alt="User"/><div class="sidebar-user-info"><div class="user-name" id="sidebar-name">User</div><div class="user-plan">free</div></div></a></div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <main class="main-content">
+    <header class="top-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+        <h1 class="page-title">📁 File Upload Summarizer</h1>
+      </div>
+    </header>
+    <div class="page-content">
+      <div class="grid-2" style="gap:24px;align-items:start">
+        <div>
+          <div class="card">
+            <h3 style="margin-bottom:8px;font-size:1rem;color:var(--text-secondary)">UPLOAD YOUR FILE</h3>
+            <p style="font-size:0.82rem;color:var(--text-muted);margin-bottom:20px">Supports PDF (.pdf) and plain text (.txt) files up to 10MB.</p>
+            <div class="upload-zone" id="drop-zone">
+              <input type="file" id="file-input" accept=".pdf,.txt" onchange="handleFileSelect(this.files[0])"/>
+              <div class="upload-icon">📁</div>
+              <div class="upload-title">Drop your file here</div>
+              <div class="upload-subtitle">or click to browse</div>
+              <div class="upload-hint">PDF · TXT · Max 10MB</div>
+            </div>
+            <div id="file-info" class="hidden" style="margin-top:16px;padding:16px;background:rgba(0,229,160,0.06);border-radius:var(--radius-md);border:1px solid rgba(0,229,160,0.2)">
+              <div style="display:flex;align-items:center;gap:12px">
+                <span id="file-icon" style="font-size:1.8rem">📄</span>
+                <div style="flex:1"><div id="file-name" style="font-weight:600;font-size:0.9rem"></div><div id="file-size" style="font-size:0.78rem;color:var(--text-muted);margin-top:2px"></div></div>
+                <button onclick="clearFile()" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:1.1rem">✕</button>
+              </div>
+            </div>
+            <div id="options-panel" style="margin-top:20px"></div>
+            <button id="summarize-btn" class="btn btn-primary btn-block btn-lg" onclick="summarizeFile()" style="margin-top:16px">📁 Summarize File</button>
+          </div>
+          <!-- Supported formats -->
+          <div class="card" style="margin-top:16px">
+            <h4 style="margin-bottom:16px;font-size:0.85rem;color:var(--text-secondary)">📋 Supported Formats</h4>
+            <div style="display:flex;flex-direction:column;gap:12px">
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(239,68,68,0.06);border-radius:var(--radius-md);border:1px solid rgba(239,68,68,0.15)">
+                <span style="font-size:1.3rem">📄</span><div><div style="font-size:0.85rem;font-weight:600">PDF Files (.pdf)</div><div style="font-size:0.75rem;color:var(--text-muted)">Text-based PDFs. Max 10MB</div></div>
+                <span class="badge badge-success" style="margin-left:auto">Supported</span>
+              </div>
+              <div style="display:flex;align-items:center;gap:12px;padding:12px;background:rgba(108,99,255,0.06);border-radius:var(--radius-md);border:1px solid rgba(108,99,255,0.15)">
+                <span style="font-size:1.3rem">📝</span><div><div style="font-size:0.85rem;font-weight:600">Text Files (.txt)</div><div style="font-size:0.75rem;color:var(--text-muted)">Plain text. Max 10MB</div></div>
+                <span class="badge badge-success" style="margin-left:auto">Supported</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div id="result-container">
+          <div class="card" style="text-align:center;padding:60px 24px">
+            <div style="font-size:3rem;margin-bottom:16px;opacity:0.3">📁</div>
+            <h3 style="color:var(--text-muted)">Upload a file to summarize</h3>
+            <p style="font-size:0.85rem;color:var(--text-muted);margin-top:8px">Supports PDF and TXT files</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/app.js"></script>
+<script>
+  initSidebar();
+  document.getElementById('options-panel').innerHTML = optionsPanelHTML();
+  let selectedFile = null;
+  const dropZone = document.getElementById('drop-zone');
+  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+  dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); if(e.dataTransfer.files[0]) handleFileSelect(e.dataTransfer.files[0]); });
+  function handleFileSelect(file) {
+    if (!file) return;
+    const ext = file.name.split('.').pop().toLowerCase();
+    if (!['pdf','txt'].includes(ext)) { Toast.error('Only PDF and TXT files are supported.'); return; }
+    if (file.size > 10*1024*1024) { Toast.error('File too large. Max 10MB.'); return; }
+    selectedFile = file;
+    document.getElementById('file-icon').textContent = ext === 'pdf' ? '📄' : '📝';
+    document.getElementById('file-name').textContent = file.name;
+    document.getElementById('file-size').textContent = (file.size/1024/1024).toFixed(2) + ' MB · ' + ext.toUpperCase();
+    DOM.show(document.getElementById('file-info'));
+    dropZone.style.borderColor = 'var(--success)';
+    Toast.success('File ready: ' + file.name);
+  }
+  function clearFile() { selectedFile=null; document.getElementById('file-input').value=''; DOM.hide(document.getElementById('file-info')); dropZone.style.borderColor=''; }
+  async function summarizeFile() {
+    if (!selectedFile) { Toast.error('Please select a file.'); return; }
+    const btn = document.getElementById('summarize-btn');
+    btn.disabled=true; btn.innerHTML='<span class="spinner spinner-sm"></span> Processing...';
+    Loader.show('Reading file content...');
+    try {
+      const fd = new FormData();
+      fd.append('file', selectedFile);
+      fd.append('options', JSON.stringify(buildOptions()));
+      if (Auth.getApiKey()) fd.append('apiKey', Auth.getApiKey());
+      Loader.setMessage('Gemini AI is summarizing...');
+      const data = await Api.summarizeFile(fd);
+      renderResult(data.result);
+      Results.save(data.result);
+      Toast.success('File summarized!');
+    } catch(err) {
+      Toast.error(err.message, 6000);
+      document.getElementById('result-container').innerHTML = `<div class="card" style="border-color:var(--danger)"><h3 style="color:var(--danger)">❌ Error</h3><p style="margin-top:8px">${err.message}</p></div>`;
+    } finally { Loader.hide(); btn.disabled=false; btn.innerHTML='📁 Summarize File'; }
+  }
+</script>
+</body>
+</html>

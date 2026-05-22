@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Summary Results — SummAI</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    .results-hero { background:var(--gradient-card); border:1px solid rgba(108,99,255,0.2); border-radius:var(--radius-xl); padding:40px; margin-bottom:24px; position:relative; overflow:hidden; }
+    .results-hero::after { content:'✨'; position:absolute; right:40px; top:50%; transform:translateY(-50%); font-size:8rem; opacity:0.05; }
+    .share-bar { display:flex; gap:10px; flex-wrap:wrap; margin-top:20px; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo"><div class="sidebar-logo-icon">🧠</div><div class="sidebar-logo-text">Summ<span>AI</span></div></a>
+    <div class="sidebar-section"><div class="sidebar-section-label">Main</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+        <li><a href="text-summarizer.html"><span class="nav-icon">📝</span>Text Summarizer</a></li>
+        <li><a href="file-upload.html"><span class="nav-icon">📁</span>File Upload</a></li>
+        <li><a href="pdf-summarizer.html"><span class="nav-icon">📄</span>PDF Summarizer</a></li>
+        <li><a href="url-summarizer.html"><span class="nav-icon">🔗</span>URL Summarizer</a></li>
+        <li><a href="youtube-summarizer.html"><span class="nav-icon">▶️</span>YouTube Summarizer</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Insights</div>
+      <ul class="sidebar-nav">
+        <li><a href="history.html"><span class="nav-icon">🕒</span>History</a></li>
+        <li><a href="analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Account</div>
+      <ul class="sidebar-nav">
+        <li><a href="settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
+        <li><a href="api-config.html"><span class="nav-icon">🔑</span>API Configuration</a></li>
+        <li><a href="profile.html"><span class="nav-icon">👤</span>Profile</a></li>
+        <li><button onclick="Auth.clearAuth();window.location.href='login.html'"><span class="nav-icon">🚪</span>Logout</button></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer"><a href="profile.html" class="sidebar-user"><img src="https://ui-avatars.com/api/?name=User&background=6c63ff&color=fff" alt="User"/><div class="sidebar-user-info"><div class="user-name" id="sidebar-name">User</div><div class="user-plan">free</div></div></a></div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <main class="main-content">
+    <header class="top-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+        <button onclick="history.back()" class="btn btn-secondary btn-sm">← Back</button>
+        <h1 class="page-title">✨ Summary Results</h1>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" onclick="downloadSummary()">⬇️ Export</button>
+        <button class="btn btn-primary btn-sm" onclick="copyToClipboard(window._currentResult?.summary||'')">📋 Copy</button>
+      </div>
+    </header>
+    <div class="page-content">
+      <div id="no-result" class="hidden">
+        <div class="empty-state">
+          <div class="empty-state-icon">📭</div>
+          <h3>No result to display</h3>
+          <p>Please generate a summary first from one of the summarizer pages.</p>
+          <div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center;margin-top:16px">
+            <a href="text-summarizer.html" class="btn btn-primary btn-sm">📝 Text</a>
+            <a href="pdf-summarizer.html" class="btn btn-secondary btn-sm">📄 PDF</a>
+            <a href="url-summarizer.html" class="btn btn-secondary btn-sm">🔗 URL</a>
+            <a href="youtube-summarizer.html" class="btn btn-secondary btn-sm">▶️ YouTube</a>
+          </div>
+        </div>
+      </div>
+      <div id="result-display"></div>
+      <!-- New Summary Actions -->
+      <div id="actions-section" class="hidden" style="margin-top:24px">
+        <div class="card">
+          <h3 style="margin-bottom:16px;font-size:0.9rem;color:var(--text-secondary)">GENERATE ANOTHER SUMMARY</h3>
+          <div style="display:flex;gap:12px;flex-wrap:wrap">
+            <a href="text-summarizer.html" class="btn btn-secondary btn-sm">📝 New Text Summary</a>
+            <a href="pdf-summarizer.html" class="btn btn-secondary btn-sm">📄 Summarize PDF</a>
+            <a href="url-summarizer.html" class="btn btn-secondary btn-sm">🔗 Summarize URL</a>
+            <a href="youtube-summarizer.html" class="btn btn-secondary btn-sm">▶️ YouTube Video</a>
+            <a href="history.html" class="btn btn-secondary btn-sm">🕒 View History</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+<script src="js/app.js"></script>
+<script>
+  initSidebar();
+  const result = Results.get();
+  if (!result) {
+    DOM.show(document.getElementById('no-result'));
+  } else {
+    window._currentResult = result;
+    const display = document.getElementById('result-display');
+    const sentClass = result.sentiment || 'neutral';
+    display.innerHTML = `
+      <div class="results-hero fade-in">
+        <div class="flex-between" style="flex-wrap:wrap;gap:16px">
+          <div>
+            <div style="font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--primary);margin-bottom:8px">✨ AI Generated Summary</div>
+            <h2 style="font-size:1.6rem;margin-bottom:12px">${result.title || 'Summary'}</h2>
+            <div style="display:flex;gap:10px;flex-wrap:wrap">
+              <span class="badge badge-primary">📖 ${result.readingTime||'1 min read'}</span>
+              <span class="badge badge-accent">📝 ${result.wordCount||0} words</span>
+              <span class="sentiment ${sentClass}">${Format.sentimentEmoji(sentClass)} ${sentClass}</span>
+              <span class="badge badge-primary">🤖 ${result.model||'Gemini AI'}</span>
+              ${result.language ? `<span class="badge badge-primary">🌐 ${result.language}</span>` : ''}
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="copy-btn" onclick="copyToClipboard(\`${(result.summary||'').replace(/`/g,'\\`')}\`,this)">📋 Copy Summary</button>
+            <button class="copy-btn" onclick="downloadSummary()">⬇️ Export .txt</button>
+          </div>
+        </div>
+      </div>
+      <div class="card fade-in" style="animation-delay:0.1s">
+        <div class="result-section-title">📄 Summary</div>
+        <div class="result-summary" style="font-size:1rem;line-height:1.9">${result.summary||''}</div>
+      </div>
+      ${result.keyPoints?.length ? `
+      <div class="card fade-in" style="animation-delay:0.2s;margin-top:0">
+        <div class="result-section-title" style="margin-bottom:16px">🎯 Key Points</div>
+        <ul class="key-points">${result.keyPoints.map(p=>`<li>${p}</li>`).join('')}</ul>
+      </div>` : ''}
+      <div class="grid-2" style="animation-delay:0.3s">
+        ${result.tags?.length ? `
+        <div class="card">
+          <div class="result-section-title">🏷️ Topics & Tags</div>
+          <div class="tags-container" style="margin-top:12px">${result.tags.map(t=>`<span class="badge badge-primary"># ${t}</span>`).join('')}</div>
+        </div>` : ''}
+        <div class="card">
+          <div class="result-section-title">📊 Analysis Details</div>
+          <div style="display:flex;flex-direction:column;gap:10px;margin-top:12px">
+            <div style="display:flex;justify-content:space-between;font-size:0.85rem"><span style="color:var(--text-muted)">Sentiment</span><span class="sentiment ${sentClass}" style="padding:2px 10px">${sentClass}</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.85rem"><span style="color:var(--text-muted)">Confidence</span><span style="color:var(--success);font-weight:600">${((result.confidence||0.9)*100).toFixed(0)}%</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.85rem"><span style="color:var(--text-muted)">Reading Time</span><span style="font-weight:600">${result.readingTime||'—'}</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.85rem"><span style="color:var(--text-muted)">Word Count</span><span style="font-weight:600">${result.wordCount||0}</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:0.85rem"><span style="color:var(--text-muted)">Generated</span><span style="font-weight:600">${result.generatedAt?Format.datetime(result.generatedAt):'—'}</span></div>
+          </div>
+        </div>
+      </div>
+      ${result.sourceInfo ? `
+      <div class="card fade-in" style="animation-delay:0.4s">
+        <div class="result-section-title">🔗 Source Information</div>
+        <div style="margin-top:12px;display:flex;flex-wrap:wrap;gap:16px;font-size:0.85rem">
+          ${result.sourceInfo.filename ? `<div style="display:flex;align-items:center;gap:8px"><span>📎</span><span>${result.sourceInfo.filename}</span></div>` : ''}
+          ${result.sourceInfo.pages ? `<div style="display:flex;align-items:center;gap:8px"><span>📄</span><span>${result.sourceInfo.pages} pages</span></div>` : ''}
+          ${result.sourceInfo.url ? `<div style="display:flex;align-items:center;gap:8px"><span>🔗</span><a href="${result.sourceInfo.url}" target="_blank" style="color:var(--accent)">View Original ↗</a></div>` : ''}
+          ${result.sourceInfo.videoId ? `<div style="display:flex;align-items:center;gap:8px"><span>▶️</span><a href="${result.sourceInfo.videoUrl}" target="_blank" style="color:var(--accent)">Watch on YouTube ↗</a></div>` : ''}
+        </div>
+      </div>` : ''}
+    `;
+    DOM.show(document.getElementById('actions-section'));
+  }
+</script>
+</body>
+</html>

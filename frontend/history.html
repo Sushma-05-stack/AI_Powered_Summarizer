@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>History — SummAI</title>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    .history-item { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:20px; transition:var(--transition); cursor:pointer; position:relative; }
+    .history-item:hover { border-color:var(--primary); transform:translateY(-2px); box-shadow:var(--shadow-md); }
+    .history-item-header { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; margin-bottom:10px; }
+    .history-type-badge { display:flex; align-items:center; gap:6px; font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; padding:4px 10px; border-radius:20px; flex-shrink:0; }
+    .history-item-title { font-size:0.92rem; font-weight:600; line-height:1.4; }
+    .history-item-preview { font-size:0.82rem; color:var(--text-muted); line-height:1.6; margin:8px 0; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+    .history-item-footer { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; margin-top:12px; }
+    .filter-bar { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin-bottom:24px; }
+    .search-box { flex:1; min-width:200px; }
+    .type-filter { display:flex; gap:6px; flex-wrap:wrap; }
+    .type-btn { padding:6px 14px; border-radius:20px; border:1px solid var(--border); background:none; color:var(--text-muted); font-size:0.78rem; font-weight:600; cursor:pointer; transition:var(--transition-fast); font-family:'Inter',sans-serif; }
+    .type-btn.active { background:rgba(108,99,255,0.15); color:var(--primary); border-color:rgba(108,99,255,0.4); }
+    .type-btn:hover:not(.active) { color:var(--text-primary); border-color:var(--primary); }
+    .delete-btn { background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.9rem; padding:4px 8px; border-radius:4px; transition:var(--transition-fast); }
+    .delete-btn:hover { color:var(--danger); background:rgba(239,68,68,0.1); }
+    .history-grid { display:flex; flex-direction:column; gap:12px; }
+    .pagination { display:flex; gap:8px; justify-content:center; align-items:center; margin-top:24px; }
+    .page-btn { padding:8px 16px; border-radius:var(--radius-md); border:1px solid var(--border); background:var(--bg-card); color:var(--text-secondary); font-size:0.85rem; cursor:pointer; transition:var(--transition-fast); font-family:'Inter',sans-serif; }
+    .page-btn.active { background:var(--primary); color:#fff; border-color:var(--primary); }
+    .page-btn:hover:not(.active) { border-color:var(--primary); color:var(--primary); }
+    .page-btn:disabled { opacity:0.4; cursor:not-allowed; }
+  </style>
+</head>
+<body>
+<div class="app-layout">
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo"><div class="sidebar-logo-icon">🧠</div><div class="sidebar-logo-text">Summ<span>AI</span></div></a>
+    <div class="sidebar-section"><div class="sidebar-section-label">Main</div>
+      <ul class="sidebar-nav">
+        <li><a href="dashboard.html"><span class="nav-icon">📊</span>Dashboard</a></li>
+        <li><a href="text-summarizer.html"><span class="nav-icon">📝</span>Text Summarizer</a></li>
+        <li><a href="file-upload.html"><span class="nav-icon">📁</span>File Upload</a></li>
+        <li><a href="pdf-summarizer.html"><span class="nav-icon">📄</span>PDF Summarizer</a></li>
+        <li><a href="url-summarizer.html"><span class="nav-icon">🔗</span>URL Summarizer</a></li>
+        <li><a href="youtube-summarizer.html"><span class="nav-icon">▶️</span>YouTube Summarizer</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Insights</div>
+      <ul class="sidebar-nav">
+        <li><a href="history.html" class="active"><span class="nav-icon">🕒</span>History</a></li>
+        <li><a href="analytics.html"><span class="nav-icon">📈</span>Analytics</a></li>
+      </ul>
+    </div>
+    <div class="sidebar-section"><div class="sidebar-section-label">Account</div>
+      <ul class="sidebar-nav">
+        <li><a href="settings.html"><span class="nav-icon">⚙️</span>Settings</a></li>
+        <li><a href="api-config.html"><span class="nav-icon">🔑</span>API Configuration</a></li>
+        <li><a href="profile.html"><span class="nav-icon">👤</span>Profile</a></li>
+        <li><button onclick="Auth.clearAuth();window.location.href='login.html'"><span class="nav-icon">🚪</span>Logout</button></li>
+      </ul>
+    </div>
+    <div class="sidebar-footer"><a href="profile.html" class="sidebar-user"><img src="https://ui-avatars.com/api/?name=User&background=6c63ff&color=fff" alt="User"/><div class="sidebar-user-info"><div class="user-name" id="sidebar-name">User</div><div class="user-plan">free</div></div></a></div>
+  </aside>
+  <div class="sidebar-overlay" id="sidebar-overlay"></div>
+  <main class="main-content">
+    <header class="top-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        <button class="mobile-menu-btn" onclick="document.getElementById('sidebar').classList.toggle('open');document.getElementById('sidebar-overlay').classList.toggle('show')">☰</button>
+        <h1 class="page-title">🕒 History</h1>
+      </div>
+      <div class="header-actions">
+        <button class="btn btn-secondary btn-sm" onclick="clearAllHistory()" id="clear-btn">🗑️ Clear All</button>
+        <span id="total-count" class="badge badge-primary">0 items</span>
+      </div>
+    </header>
+    <div class="page-content">
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="input-group search-box">
+          <span class="input-icon">🔍</span>
+          <input type="text" id="search-input" class="form-control" placeholder="Search summaries..." style="padding-left:44px" oninput="onSearch(this.value)"/>
+        </div>
+        <div class="type-filter">
+          <button class="type-btn active" onclick="setFilter('all',this)">All</button>
+          <button class="type-btn" onclick="setFilter('text',this)">📝 Text</button>
+          <button class="type-btn" onclick="setFilter('pdf',this)">📄 PDF</button>
+          <button class="type-btn" onclick="setFilter('url',this)">🔗 URL</button>
+          <button class="type-btn" onclick="setFilter('youtube',this)">▶️ YouTube</button>
+          <button class="type-btn" onclick="setFilter('file',this)">📁 File</button>
+        </div>
+      </div>
+      <!-- History List -->
+      <div class="history-grid" id="history-list">
+        <div class="skeleton" style="height:120px;border-radius:var(--radius-lg)"></div>
+        <div class="skeleton" style="height:120px;border-radius:var(--radius-lg)"></div>
+        <div class="skeleton" style="height:120px;border-radius:var(--radius-lg)"></div>
+      </div>
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </main>
+</div>
+<script src="js/app.js"></script>
+<script>
+  initSidebar();
+  let currentFilter = 'all', currentSearch = '', currentPage = 1, totalPages = 1;
+  const typeColors = { text:'rgba(108,99,255,0.15)', pdf:'rgba(239,68,68,0.15)', url:'rgba(0,212,255,0.15)', youtube:'rgba(255,0,0,0.15)', file:'rgba(0,229,160,0.15)' };
+  const typeColors2 = { text:'rgba(108,99,255,0.4)', pdf:'rgba(239,68,68,0.4)', url:'rgba(0,212,255,0.4)', youtube:'rgba(255,0,0,0.4)', file:'rgba(0,229,160,0.4)' };
+
+  async function loadHistory() {
+    document.getElementById('history-list').innerHTML = '<div class="skeleton" style="height:120px;border-radius:var(--radius-lg)"></div>'.repeat(3);
+    try {
+      const params = { limit:10, page:currentPage };
+      if (currentFilter !== 'all') params.type = currentFilter;
+      if (currentSearch) params.search = currentSearch;
+      const data = await Api.getHistory(params);
+      totalPages = data.totalPages || 1;
+      document.getElementById('total-count').textContent = `${data.total} item${data.total!==1?'s':''}`;
+      renderHistory(data.history || []);
+      renderPagination(data.page, data.totalPages);
+    } catch(err) {
+      document.getElementById('history-list').innerHTML = `<div class="empty-state"><div class="empty-state-icon">⚠️</div><h3>Failed to load history</h3><p>${err.message}</p></div>`;
+    }
+  }
+
+  function renderHistory(items) {
+    const list = document.getElementById('history-list');
+    if (!items.length) { list.innerHTML = `<div class="empty-state"><div class="empty-state-icon">📭</div><h3>No summaries found</h3><p>Try adjusting your filters or create your first summary.</p><a href="text-summarizer.html" class="btn btn-primary btn-sm" style="margin-top:12px">+ New Summary</a></div>`; return; }
+    list.innerHTML = items.map(h => `
+      <div class="history-item fade-in" onclick="viewItem('${h.id}')">
+        <div class="history-item-header">
+          <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:0">
+            <span style="font-size:1.4rem;flex-shrink:0">${Format.typeIcon(h.type)}</span>
+            <div style="min-width:0">
+              <div class="history-item-title">${h.result?.title || h.input?.substring(0,80) || 'Summary'}</div>
+              <div style="font-size:0.75rem;color:var(--text-muted);margin-top:2px">${Format.typeLabel(h.type)} · ${Format.datetime(h.createdAt)}</div>
+            </div>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;flex-shrink:0">
+            <span class="history-type-badge" style="background:${typeColors[h.type]||typeColors.text};color:#fff;border:1px solid ${typeColors2[h.type]||typeColors2.text}">${Format.typeLabel(h.type)}</span>
+            <button class="delete-btn" onclick="event.stopPropagation();deleteItem('${h.id}')" title="Delete">🗑️</button>
+          </div>
+        </div>
+        <div class="history-item-preview">${h.result?.summary || 'No preview available'}</div>
+        <div class="history-item-footer">
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            ${h.result?.sentiment ? `<span class="sentiment ${h.result.sentiment}" style="font-size:0.72rem;padding:2px 8px">${Format.sentimentEmoji(h.result.sentiment)} ${h.result.sentiment}</span>` : ''}
+            ${h.result?.readingTime ? `<span class="badge badge-primary" style="font-size:0.7rem">📖 ${h.result.readingTime}</span>` : ''}
+            ${h.result?.tags?.slice(0,2).map(t=>`<span class="badge badge-accent" style="font-size:0.7rem">${t}</span>`).join('')||''}
+          </div>
+          <span class="btn btn-secondary btn-sm" style="font-size:0.78rem;padding:6px 14px">View →</span>
+        </div>
+      </div>`).join('');
+  }
+
+  function renderPagination(page, total) {
+    const pag = document.getElementById('pagination');
+    if (total <= 1) { pag.innerHTML=''; return; }
+    let html = `<button class="page-btn" onclick="goPage(${page-1})" ${page<=1?'disabled':''}>← Prev</button>`;
+    for(let i=1;i<=Math.min(total,7);i++) { html += `<button class="page-btn ${i===page?'active':''}" onclick="goPage(${i})">${i}</button>`; }
+    if(total>7) html += `<span style="color:var(--text-muted)">...</span><button class="page-btn ${total===page?'active':''}" onclick="goPage(${total})">${total}</button>`;
+    html += `<button class="page-btn" onclick="goPage(${page+1})" ${page>=total?'disabled':''}>Next →</button>`;
+    pag.innerHTML = html;
+  }
+
+  function goPage(p) { if(p<1||p>totalPages) return; currentPage=p; loadHistory(); }
+  function setFilter(type,btn) { currentFilter=type; currentPage=1; document.querySelectorAll('.type-btn').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); loadHistory(); }
+  let searchTimeout;
+  function onSearch(val) { clearTimeout(searchTimeout); searchTimeout=setTimeout(()=>{ currentSearch=val; currentPage=1; loadHistory(); },400); }
+  function viewItem(id) {
+    Api.getHistoryItem(id).then(data=>{ if(data.item?.result){ Results.save(data.item.result); window.location.href='results.html'; } }).catch(()=>{});
+  }
+  async function deleteItem(id) {
+    if(!confirm('Delete this summary from history?')) return;
+    try { await Api.deleteHistory(id); Toast.success('Deleted!'); loadHistory(); } catch(err) { Toast.error(err.message); }
+  }
+  async function clearAllHistory() {
+    if(!confirm('Clear ALL history? This cannot be undone.')) return;
+    try { await Api.clearHistory(); Toast.success('History cleared!'); loadHistory(); } catch(err) { Toast.error(err.message); }
+  }
+  loadHistory();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+[
+  {
+    "id": "643389c3-ade7-4539-b40c-8f0bde3e4bc7",
+    "type": "pdf",
+    "userId": "guest",
+    "input": "Weather_Analysis.pptx.pdf",
+    "result": {
+      "summary": "This presentation details a weather analysis project conducted using R programming, RStudio, and libraries such as tidyverse and ggplot2. The project aimed to study temperature, humidity, precipitation, and wind speed variations, identifying relationships between parameters, and visualizing trends. Using a Kaggle weather dataset, the team performed exploratory data analysis, data cleaning, and generated numerous visualizations like distribution plots and a temperature vs. humidity scatter plot. Correlation analysis was also conducted to understand parameter relationships. The project successfully analyzed weather data to understand patterns, with future work proposed to include machine learning for weather prediction and time series forecasting.",
+      "sourceInfo": {
+        "pages": 17,
+        "wordCount": 287,
+        "filename": "Weather_Analysis.pptx.pdf"
+      }
+    },
+    "createdAt": "2026-05-22T06:29:04.265Z"
+  }
+]

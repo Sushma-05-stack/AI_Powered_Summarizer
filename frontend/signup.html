@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sign Up — SummAI</title>
+  <meta name="description" content="Create your free SummAI account and start summarizing content with AI."/>
+  <link rel="stylesheet" href="css/main.css"/>
+  <style>
+    body { min-height:100vh; display:flex; align-items:center; justify-content:center; background:var(--gradient-hero); padding:20px; overflow:hidden; }
+    .auth-container { display:grid; grid-template-columns:1fr 1.2fr; max-width:1050px; width:100%; min-height:640px; border-radius:var(--radius-xl); overflow:hidden; border:1px solid var(--border); box-shadow:var(--shadow-lg); }
+    .auth-left { background:linear-gradient(135deg,#0d1a40 0%,#0d0d2b 100%); padding:48px 40px; display:flex; flex-direction:column; justify-content:center; position:relative; overflow:hidden; }
+    .auth-left::after { content:''; position:absolute; bottom:-80px; left:-80px; width:350px; height:350px; border-radius:50%; background:radial-gradient(circle,rgba(0,212,255,0.15) 0%,transparent 70%); }
+    .auth-right { background:rgba(7,7,26,0.97); padding:48px 40px; display:flex; flex-direction:column; justify-content:center; overflow-y:auto; }
+    .plan-badge { display:inline-flex; align-items:center; gap:8px; background:rgba(0,229,160,0.15); border:1px solid rgba(0,229,160,0.3); color:var(--accent3); padding:8px 18px; border-radius:30px; font-size:0.8rem; font-weight:700; margin-bottom:24px; letter-spacing:0.5px; }
+    .steps-indicator { display:flex; align-items:center; gap:8px; margin-bottom:32px; }
+    .step-dot { width:8px; height:8px; border-radius:50%; background:var(--border); transition:var(--transition); }
+    .step-dot.active { background:var(--primary); width:24px; border-radius:4px; }
+    .strength-bar { height:4px; border-radius:2px; background:var(--border); margin-top:8px; overflow:hidden; }
+    .strength-fill { height:100%; border-radius:2px; transition:width 0.4s,background 0.4s; }
+    .strength-label { font-size:0.72rem; margin-top:4px; font-weight:600; }
+    .plan-card { border:2px solid var(--border); border-radius:var(--radius-md); padding:16px; cursor:pointer; transition:var(--transition-fast); display:flex; align-items:center; gap:12px; }
+    .plan-card.selected { border-color:var(--primary); background:rgba(108,99,255,0.08); }
+    .plan-radio { width:18px; height:18px; border-radius:50%; border:2px solid var(--border); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+    .plan-card.selected .plan-radio { border-color:var(--primary); background:var(--primary); }
+    .plan-card.selected .plan-radio::after { content:''; width:6px; height:6px; border-radius:50%; background:#fff; }
+    .terms-check { display:flex; align-items:flex-start; gap:10px; font-size:0.82rem; color:var(--text-muted); }
+    .terms-check input { margin-top:2px; accent-color:var(--primary); }
+    @media(max-width:768px){ .auth-container{grid-template-columns:1fr;} .auth-left{display:none;} .auth-right{padding:32px 24px;} }
+  </style>
+</head>
+<body>
+  <div id="particles" class="particles-bg"></div>
+  <div class="auth-container fade-in">
+    <!-- Left Panel -->
+    <div class="auth-left">
+      <a href="index.html" style="display:flex;align-items:center;gap:10px;text-decoration:none;margin-bottom:48px">
+        <div style="width:40px;height:40px;background:var(--gradient-primary);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.2rem">🧠</div>
+        <span style="font-family:'Outfit',sans-serif;font-size:1.3rem;font-weight:800">Summ<span style="color:var(--accent)">AI</span></span>
+      </a>
+      <div class="plan-badge">🎉 Free Forever Plan Available</div>
+      <h2 style="font-size:1.6rem;margin-bottom:12px">Start Summarizing<br/><span class="gradient-text">in 60 Seconds</span></h2>
+      <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:40px;line-height:1.7">Create your account and instantly access AI-powered summarization for any type of content.</p>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.85rem"><span style="color:var(--success);font-size:1rem">✅</span><span>Unlimited text summarization</span></div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.85rem"><span style="color:var(--success);font-size:1rem">✅</span><span>PDF & file uploads up to 10MB</span></div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.85rem"><span style="color:var(--success);font-size:1rem">✅</span><span>YouTube transcript summarizer</span></div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.85rem"><span style="color:var(--success);font-size:1rem">✅</span><span>Full history & analytics</span></div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.85rem"><span style="color:var(--success);font-size:1rem">✅</span><span>Custom AI settings & options</span></div>
+        <div style="display:flex;align-items:center;gap:12px;font-size:0.85rem"><span style="color:var(--success);font-size:1rem">✅</span><span>No credit card required</span></div>
+      </div>
+    </div>
+    <!-- Right Panel -->
+    <div class="auth-right">
+      <h1 style="font-size:1.8rem;font-weight:800;margin-bottom:6px">Create Account</h1>
+      <p style="color:var(--text-muted);font-size:0.88rem;margin-bottom:28px">Join SummAI and start saving hours of reading time</p>
+      <form id="signup-form">
+        <div class="grid-2" style="gap:16px">
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="name">Full Name</label>
+            <div class="input-group">
+              <span class="input-icon">👤</span>
+              <input type="text" id="name" class="form-control" placeholder="John Doe" required autocomplete="name"/>
+            </div>
+          </div>
+          <div class="form-group" style="margin:0">
+            <label class="form-label" for="email">Email Address</label>
+            <div class="input-group">
+              <span class="input-icon">📧</span>
+              <input type="email" id="email" class="form-control" placeholder="you@example.com" required autocomplete="email"/>
+            </div>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:16px">
+          <label class="form-label" for="password">Password</label>
+          <div class="input-group">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="password" class="form-control" placeholder="Min. 6 characters" required autocomplete="new-password"/>
+          </div>
+          <div class="strength-bar"><div class="strength-fill" id="strength-fill" style="width:0%"></div></div>
+          <div class="strength-label" id="strength-label" style="color:var(--text-muted)">Enter a password</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="confirm">Confirm Password</label>
+          <div class="input-group">
+            <span class="input-icon">🔑</span>
+            <input type="password" id="confirm" class="form-control" placeholder="Re-enter password" required autocomplete="new-password"/>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Gemini API Key <span style="color:var(--text-muted);font-weight:400;text-transform:none">(optional — add later in settings)</span></label>
+          <div class="input-group">
+            <span class="input-icon">🔑</span>
+            <input type="text" id="api-key" class="form-control" placeholder="AIza..."/>
+          </div>
+        </div>
+        <div class="terms-check" style="margin-bottom:20px">
+          <input type="checkbox" id="terms" required/>
+          <label for="terms">I agree to the <a href="#" style="color:var(--primary)">Terms of Service</a> and <a href="#" style="color:var(--primary)">Privacy Policy</a></label>
+        </div>
+        <div id="signup-error" class="hidden" style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:var(--radius-md);padding:12px 16px;font-size:0.85rem;color:var(--danger);margin-bottom:16px"></div>
+        <button type="submit" id="signup-btn" class="btn btn-primary btn-block btn-lg">
+          <span id="btn-text">Create Free Account 🚀</span>
+          <span id="btn-spinner" class="spinner spinner-sm hidden"></span>
+        </button>
+      </form>
+      <div style="margin-top:20px;text-align:center;font-size:0.85rem;color:var(--text-muted)">
+        Already have an account? <a href="login.html" style="color:var(--primary);font-weight:600">Sign in →</a>
+      </div>
+    </div>
+  </div>
+  <script src="js/app.js"></script>
+  <script>
+    initParticles();
+    if (Auth.isLoggedIn()) window.location.href = 'dashboard.html';
+    // Password strength
+    document.getElementById('password').addEventListener('input', function() {
+      const v = this.value, fill = document.getElementById('strength-fill'), label = document.getElementById('strength-label');
+      let strength = 0, color = 'var(--danger)', text = 'Weak';
+      if (v.length >= 6) strength = 25;
+      if (v.length >= 8) strength = 50;
+      if (/[A-Z]/.test(v) && /[0-9]/.test(v)) strength = 75;
+      if (/[^A-Za-z0-9]/.test(v) && v.length >= 10) strength = 100;
+      if (strength >= 75) { color = 'var(--success)'; text = strength===100?'Very Strong 💪':'Strong'; }
+      else if (strength >= 50) { color = 'var(--warning)'; text = 'Medium'; }
+      else if (strength >= 25) { color = 'var(--danger)'; text = 'Weak'; }
+      fill.style.width = strength + '%'; fill.style.background = color; label.textContent = text; label.style.color = color;
+    });
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('signup-btn'), btnText = document.getElementById('btn-text'), spinner = document.getElementById('btn-spinner'), errEl = document.getElementById('signup-error');
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm').value;
+      const apiKey = document.getElementById('api-key').value.trim();
+      errEl.classList.add('hidden');
+      if (password !== confirm) { errEl.textContent = 'Passwords do not match.'; errEl.classList.remove('hidden'); return; }
+      btn.disabled=true; btnText.textContent='Creating account...'; DOM.show(spinner);
+      try {
+        const data = await Api.register(name, email, password);
+        Auth.setAuth(data.token, data.user);
+        if (apiKey) Auth.setApiKey(apiKey);
+        Toast.success('Account created! Welcome to SummAI 🎉');
+        setTimeout(() => window.location.href = 'dashboard.html', 900);
+      } catch(err) {
+        errEl.textContent = err.message; errEl.classList.remove('hidden');
+        btn.disabled=false; btnText.textContent='Create Free Account 🚀'; DOM.hide(spinner);
+      }
+    });
+  </script>
+</body>
+</html>
