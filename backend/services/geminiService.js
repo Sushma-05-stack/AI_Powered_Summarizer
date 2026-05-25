@@ -42,7 +42,7 @@ ${text.substring(0, 10000)}`
 async function summarizeWithGemini(text, style = "concise") {
     if (!genAI) throw new Error("Gemini API key not configured.");
 
-    const models = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash"];
+    const models = ["gemini-2.5-flash", "gemini-2.0-flash", "gemini-2.0-flash-lite"];
     let lastError;
 
     for (const modelName of models) {
