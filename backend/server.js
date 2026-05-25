@@ -1,4 +1,14 @@
 require('dotenv').config();
+
+// ─── LangSmith Tracing (must be set before any AI calls) ─────────────────────
+if (process.env.LANGSMITH_TRACING === 'true' && process.env.LANGSMITH_API_KEY) {
+  process.env.LANGCHAIN_TRACING_V2 = 'true';
+  process.env.LANGCHAIN_ENDPOINT   = process.env.LANGSMITH_ENDPOINT || 'https://api.smith.langchain.com';
+  process.env.LANGCHAIN_API_KEY    = process.env.LANGSMITH_API_KEY;
+  process.env.LANGCHAIN_PROJECT    = process.env.LANGSMITH_PROJECT || 'genai';
+  console.log('🔍 LangSmith tracing enabled');
+}
+
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
