@@ -2,8 +2,9 @@
    SUMMAI — SHARED JAVASCRIPT UTILITIES
    ============================================================ */
 
-const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+const API_BASE = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
   ? 'http://localhost:5000/api'
+  : 'https://ai-powered-summarizer.onrender.com/api';
   : '/api';
 
 // ─── Auth Helpers ─────────────────────────────────────────────
