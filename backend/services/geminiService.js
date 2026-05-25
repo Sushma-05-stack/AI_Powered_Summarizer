@@ -1,15 +1,10 @@
+const Anthropic = require("@anthropic-ai/sdk");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
-
-// Models to try in order (fallback chain) — verified against API
-const MODEL_FALLBACKS = [
-    "gemini-2.0-flash-lite",
-    "gemini-2.0-flash",
-    "gemini-2.5-flash",
-    "gemini-flash-lite-latest",
-    "gemini-flash-latest"
-];
+const anthropic = new Anthropic({ apiKey: process.env.CLAUDE_API_KEY });
+const genAI = process.env.GEMINI_API_KEY
+    ? new GoogleGenerativeAI(process.env.GEMINI_API_KEY)
+    : null;
 
 const styleInstructions = {
     concise: "Provide a clear and concise summary in 3-5 sentences.",
@@ -17,60 +12,95 @@ const styleInstructions = {
     bullet: "Summarize the content as a bullet-point list of key takeaways."
 };
 
-async function summarizeText(text, options = {}) {
-    const { maxInputChars = 10000, style = "concise" } = options;
-
-    const prompt = `You are a professional AI content summarizer.
+// ── Claude summarization ───────────────────────────────────────
+async function summarizeWithClaude(text, style = "concise") {
+    const message = await anthropic.messages.create({
+        model: "claude-3-haiku-20240307",
+        max_tokens: 1024,
+        messages: [
+            {
+                role: "user",
+                content: `You are a professional AI content summarizer.
 ${styleInstructions[style] || styleInstructions.concise}
 
 Content to summarize:
-${text.substring(0, maxInputChars)}`;
+${text.substring(0, 10000)}`
+            }
+        ]
+    });
 
+    const summary = message.content[0]?.text;
+    if (!summary || summary.trim().length === 0) {
+        throw new Error("Claude returned an empty response.");
+    }
+
+    console.log("✅ Summarized using Claude (claude-3-haiku)");
+    return { summary: summary.trim() };
+}
+
+// ── Gemini summarization (fallback) ───────────────────────────
+async function summarizeWithGemini(text, style = "concise") {
+    if (!genAI) throw new Error("Gemini API key not configured.");
+
+    const models = ["gemini-2.0-flash-lite", "gemini-2.0-flash", "gemini-2.5-flash"];
     let lastError;
 
-    for (const modelName of MODEL_FALLBACKS) {
+    for (const modelName of models) {
         try {
-            console.log(`🔄 Trying model: ${modelName}`);
             const model = genAI.getGenerativeModel({ model: modelName });
+            const prompt = `You are a professional AI content summarizer.
+${styleInstructions[style] || styleInstructions.concise}
+
+Content to summarize:
+${text.substring(0, 10000)}`;
+
             const result = await model.generateContent(prompt);
             const summary = result.response.text();
 
             if (!summary || summary.trim().length === 0) {
-                throw new Error("Empty response from model.");
+                throw new Error("Empty response.");
             }
 
-            console.log(`✅ Summarized using ${modelName}`);
+            console.log(`✅ Summarized using Gemini (${modelName})`);
             return { summary: summary.trim() };
 
         } catch (err) {
-            console.error(`⚠️  ${modelName} failed: ${err.message}`);
+            console.error(`⚠️  Gemini ${modelName} failed: ${err.message}`);
             lastError = err;
-
-            // If quota exceeded, try next model
-            if (err.message.includes("429") || err.message.includes("quota")) {
+            if (err.message.includes("429") || err.message.includes("quota") ||
+                err.message.includes("404") || err.message.includes("not found")) {
                 continue;
             }
-
-            // If model not found, try next
-            if (err.message.includes("404") || err.message.includes("not found")) {
-                continue;
-            }
-
-            // Any other error — stop trying
             break;
         }
     }
 
-    // All models failed — give a clear user-facing message
-    const isQuota = lastError?.message?.includes("429") || lastError?.message?.includes("quota");
-    if (isQuota) {
-        throw new Error(
-            "API quota exceeded. Your free tier limit has been reached. " +
-            "Please wait a few minutes and try again, or upgrade your Google AI plan at https://ai.google.dev"
-        );
+    throw lastError || new Error("All Gemini models failed.");
+}
+
+// ── Main export: Claude first, Gemini fallback ─────────────────
+async function summarizeText(text, options = {}) {
+    const { style = "concise" } = options;
+
+    // Try Claude first
+    if (process.env.CLAUDE_API_KEY) {
+        try {
+            return await summarizeWithClaude(text, style);
+        } catch (err) {
+            console.error("⚠️  Claude failed:", err.message);
+        }
     }
 
-    throw new Error(`Summarization failed: ${lastError?.message}`);
+    // Fall back to Gemini
+    if (process.env.GEMINI_API_KEY) {
+        try {
+            return await summarizeWithGemini(text, style);
+        } catch (err) {
+            console.error("⚠️  Gemini failed:", err.message);
+        }
+    }
+
+    throw new Error("All summarization providers failed. Please check your API keys.");
 }
 
 module.exports = { summarizeText };
