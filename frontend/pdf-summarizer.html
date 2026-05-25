@@ -117,8 +117,7 @@
       const fd = new FormData();
       fd.append('file', selectedFile);
       fd.append('options', JSON.stringify(buildOptions()));
-      if (Auth.getApiKey()) fd.append('apiKey', Auth.getApiKey());
-      Loader.setMessage('Gemini AI is summarizing...');
+      Loader.setMessage('AI is summarizing...');
       const data = await Api.summarizePDF(fd);
       renderResult(data.result);
       Results.save(data.result);
