@@ -1,0 +1,12 @@
+{
+  "name": "ai-powered-summarizer",
+  "version": "1.0.0",
+  "description": "AI-Powered Content Summarizer",
+  "scripts": {
+    "start": "node backend/server.js",
+    "dev": "cd backend && npm run dev"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
